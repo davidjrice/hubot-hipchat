@@ -116,6 +116,9 @@ class HipChat extends Adapter
         author.name = author_data.name
         author.mention_name = author_data.mention_name
         author.jid = author_data.jid
+        author.id = author_data.id
+        if author_data.githubLogin
+          author.githubLogin = author_data.githubLogin
 
       # reformat leading @mention name to be like "name: message" which is
       # what hubot expects
@@ -134,6 +137,9 @@ class HipChat extends Adapter
         author.name = author_data.name
         author.mention_name = author_data.mention_name
         author.jid = author_data.jid
+        author.id = author_data.id
+        if author_data.githubLogin
+          author.githubLogin = author_data.githubLogin
 
       # remove leading @mention name if present and format the message like
       # "name: message" which is what hubot expects
@@ -186,13 +192,19 @@ class HipChat extends Adapter
       "agent"  : false
       "host"   : host
       "port"   : 443
-      "path"   : path += "?auth_token=#{@options.token}"
+      "path"   : path
       "method" : method
       "headers": headers
 
     if method is "POST"
-      headers["Content-Type"] = "application/x-www-form-urlencoded"
+      body.auth_token = @options.token
+      body = JSON.stringify(body)
+      headers["Content-Type"] = "application/json"
+
+      body = new Buffer(body)
       options.headers["Content-Length"] = body.length
+    else
+      options.path += "?auth_token=#{@options.token}"
 
     request = HTTPS.request options, (response) ->
       data = ""
